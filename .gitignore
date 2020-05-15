@@ -1,0 +1,4 @@
+node_modules
+lib
+# don't commit the jit repo yet
+src/.git

@@ -1,0 +1,11 @@
+Initial revision of "jit", the information manager from Boston
+
+This commit records a minimal set of functionality necessary for the code to store itself as a valid Git commit. This includes writing the following object types to the database:
+
+- Blobs of ASCII text
+- Trees containing a flat list of regular files
+- Commits that contain a tree pointer, author info and message
+
+These objects are written to `.git/objects`, compressed using zlib.
+
+At this stage, there is no index and no `add` command; the `commit` command simply writes everything in the working tree to the database and commits it.

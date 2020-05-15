@@ -1,0 +1,23 @@
+{
+  "name": "jit-ts",
+  "version": "1.0.0",
+  "description": "A Jit implementation in TypeScript",
+  "main": "./lib/jit.js",
+  "types": "./lib/jit.d.ts",
+  "bin": {
+    "jit": "./lib/jit.js"
+  },
+  "scripts": {
+    "build": "tsc -p ."
+  },
+  "keywords": [
+    "git",
+    "typescript"
+  ],
+  "author": "Ethan Arrowood",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^13.13.4",
+    "typescript": "^3.8.3"
+  }
+}
