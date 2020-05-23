@@ -22,6 +22,7 @@ export default class Database {
 
 	private async writeObject(oid: string, content: Buffer) {
 		const objectPath = path.join(this.pathname, oid.substring(0, 2), oid.substring(2))
+		if (await this.fileExists(objectPath)) return
 		const dirName = path.dirname(objectPath)
 		const tempPath = path.join(dirName, this.generateTempName())
 
@@ -54,6 +55,15 @@ export default class Database {
 	}
 
 	private generateTempName () {
-		return `tmp_obj_${crypto.randomBytes(8).toString('hex').slice(0, 8)}` // hex ensures we only get characters 0-9 and a-f
+		return `tmp_obj_${crypto.randomBytes(8).toString('hex')}` // hex ensures we only get characters 0-9 and a-f
+	}
+
+	private async fileExists(path: string) {
+		try {
+			await fs.promises.access(path, fs.constants.F_OK)
+			return true
+		} catch (err) {
+			return false
+		}
 	}
 }

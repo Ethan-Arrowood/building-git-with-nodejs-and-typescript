@@ -11,6 +11,7 @@ import Tree from './tree'
 import readStdin from './readStdin'
 import Author from './author'
 import Commit from './commit'
+import Refs from './refs'
 
 async function jit() {
 	const command = process.argv[2]
@@ -34,6 +35,7 @@ async function jit() {
 
 			const workspace = new Workspace(rootPath)
 			const database = new Database(dbPath)
+			const refs = new Refs(gitPath)
 
 			const workspaceFiles = await workspace.listFiles()
 
@@ -41,25 +43,30 @@ async function jit() {
 				const data = await workspace.readFile(path)
 				const blob = new Blob(data)
 
-				database.store(blob)
+				await database.store(blob)
 				return new Entry(path, blob.oid)
 			}))
 
 			const tree = new Tree(entries)
-			database.store(tree)
 
+			await database.store(tree)
+
+			const parent = await refs.readHead()
 			const name = process.env['GIT_AUTHOR_NAME'] || ''
 			const email = process.env['GIT_AUTHOR_EMAIL'] || ''
 			const author = new Author(name, email, new Date())
 			const message = await readStdin()
-			const commit = new Commit(tree.oid, author, message)
-			database.store(commit)
+
+			const commit = new Commit(parent, tree.oid, author, message)
+			await database.store(commit)
+			await refs.updateHead(commit.oid)
 
 			const fd = await fs.promises.open(path.join(gitPath, 'HEAD'), fs.constants.O_WRONLY | fs.constants.O_CREAT)
 			await fd.write(`${commit.oid}\n`)
 			await fd.close()
 
-			console.log(`[(root-commit) ${commit.oid}] ${message.substring(0, message.indexOf("\n"))}`)
+			const isRoot = parent === null ? "(root-commit) " : ""
+			console.log(`[${isRoot}${commit.oid}] ${message.substring(0, message.indexOf("\n"))}`)
 			break
 		}
 		default: {
